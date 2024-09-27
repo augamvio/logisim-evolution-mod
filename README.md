@@ -10,4 +10,7 @@ In this modified version (based on version 3.9.0), the following changes have be
 
 These changes have been verified using Intel Quartus Prime Lite 18.1 (Windows) with MAX10 devices.
 
-File Path: ./logisim-evolution-3.9.0/src/main/java/com/cburch/logisim/fpga/download/AlteraDownload.java
+File path for **AlteraDownload.java**:
+`./logisim-evolution-3.9.0/src/main/java/com/cburch/logisim/fpga/download/AlteraDownload.java`
+
+**Note:** This repository contains an unofficial experimental build. Unless you have a specific reason, it is recommended to use the build from the official website.
