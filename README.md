@@ -9,3 +9,5 @@ In this modified version (based on version 3.9.0), the following changes have be
   - Unused pins are now treated as inputs.
 
 These changes have been verified using Intel Quartus Prime Lite 18.1 (Windows) with MAX10 devices.
+
+File Path: ./logisim-evolution-3.9.0/src/main/java/com/cburch/logisim/fpga/download/AlteraDownload.java
