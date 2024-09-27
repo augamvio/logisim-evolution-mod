@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerException;
@@ -121,14 +122,46 @@ public class AlteraDownload implements VendorDownload {
     command.add("-m");
     command.add("jtag");
     command.add("-o");
-    // if there is no .sof generated, try with the .pof
-    if (new File(sandboxPath + ToplevelHdlGeneratorFactory.FPGA_TOP_LEVEL_NAME + ".sof").exists()) {
+    
+    // [Fixed] If both .sof and .pof are present, let the user choose.
+    final var SofFile = new File(sandboxPath + ToplevelHdlGeneratorFactory.FPGA_TOP_LEVEL_NAME + ".sof").exists();
+    final var PofFile = new File(sandboxPath + ToplevelHdlGeneratorFactory.FPGA_TOP_LEVEL_NAME + ".pof").exists();
+    
+    // If both a .sof and a .pof file exist, the user chooses
+    int choice = 0;
+    if (SofFile && PofFile) {
+        // Define the options as an array of strings.
+        String[] options = {"SOF (SRAM Object File)", "POF (Programmer Object File)"};
+
+        // Use the JOptionPane to bring up a selection pane.
+        choice = JOptionPane.showOptionDialog(
+                null,    // Parent component (displayed in the center of the screen if null)
+                "Select the programming file to download:",       // Message
+                "Select an option",                           // Window Title
+                JOptionPane.DEFAULT_OPTION,          // Option types
+                JOptionPane.INFORMATION_MESSAGE,     // Message types
+                null,                                // Icon (uses default icon if set to null)
+                options,                             // Array of options to select
+                options[0]);                         // Default selection (set to options[0])
+                
+        // choice: 0(SOF), 1(POF), other (if you closed the window without selecting anything)
+        if (choice != 1) choice = 0;  // If you closed the window without selecting anything, select SOF
+    }
+    else if (SofFile) { // If you only have a .sof file
+        choice = 0;
+    }
+    else {  // If you only have a .pof file
+        choice = 1;
+    }
+    
+    if (choice == 0) {
       command.add("P;" + ToplevelHdlGeneratorFactory.FPGA_TOP_LEVEL_NAME + ".sof"
                   + "@" + boardInfo.fpga.getFpgaJTAGChainPosition());
     } else {
       command.add("P;" + ToplevelHdlGeneratorFactory.FPGA_TOP_LEVEL_NAME + ".pof"
                   + "@" + boardInfo.fpga.getFpgaJTAGChainPosition());
     }
+
     final var down = new ProcessBuilder(command);
     down.directory(new File(sandboxPath));
     return down;
@@ -277,7 +310,9 @@ public class AlteraDownload implements VendorDownload {
         .add("{{assignName}} DEVICE {{1}}", currentBoard.fpga.getPart())
         .add("{{assignName}} DEVICE_FILTER_PACKAGE {{1}}", pkg[0])
         .add("{{assignName}} DEVICE_FILTER_PIN_COUNT {{1}}", pkg[1])
-        .add("{{assignName}} RESERVE_ALL_UNUSED_PINS \"AS INPUT {{1}}\"", behavior)
+        // Modified to treat unused pins as inputs
+        // .add("{{assignName}} RESERVE_ALL_UNUSED_PINS \"AS INPUT {{1}}\"", behavior)  // [Previoius]
+        .add("{{assignName}} RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP \"AS INPUT {{1}}\"", behavior) // [Fixed]
         .add("{{assignName}} FMAX_REQUIREMENT \"{{1}}\"", Download.getClockFrequencyString(currentBoard))
         .add("{{assignName}} RESERVE_NCEO_AFTER_CONFIGURATION \"USE AS REGULAR IO\"")
         .add("{{assignName}} CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION \"USE AS REGULAR IO\"")
