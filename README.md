@@ -1,4 +1,4 @@
-# logisim-evolution-mod
+# logisim-evolution-mod-alteradownload
  
 This repository contains an unofficial minor modification of Logisim Evolution. To view the original code, please refer to the official repository at https://github.com/logisim-evolution/logisim-evolution.
 
